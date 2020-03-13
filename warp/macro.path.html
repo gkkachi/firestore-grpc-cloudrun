@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `path` macro in crate `warp`."><meta name="keywords" content="rust, rustlang, rust-lang, path"><title>warp::path - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../dark.css"><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script src="../storage.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="shortcut icon" href="../favicon.ico"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc macro"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../warp/index.html'><div class='logo-container'><img src='../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class='location'><a href='index.html'>warp</a></p><script>window.sidebarCurrent = {name: 'path', ty: 'macro', relpath: ''};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../settings.html"><img src="../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../src/warp/filters/path.rs.html#528-532' title='goto source code'>[src]</a></span><span class='in-band'>Macro <a href='index.html'>warp</a>::<wbr><a class="macro" href=''>path</a></span></h1><div class="docblock type-decl hidden-by-usual-hider"><div class="example-wrap"><pre class="rust macro">
+<span class="macro">macro_rules</span><span class="macro">!</span> <span class="ident">path</span> {
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pieces</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> { ... };
+}</pre></div>
+</div><div class='docblock'><p>Convenient way to chain multiple path filters together.</p>
+<p>Any number of either type identifiers or string expressions can be passed,
+each separated by a forward slash (<code>/</code>). Strings will be used to match
+path segments exactly, and type identifiers are used just like
+<a href="filters::path::param"><code>param</code></a> filters.</p>
+<h1 id="example" class="section-header"><a href="#example">Example</a></h1>
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">warp</span>::<span class="ident">Filter</span>;
+
+<span class="comment">// Match `/sum/:a/:b`</span>
+<span class="kw">let</span> <span class="ident">route</span> <span class="op">=</span> <span class="ident">warp</span>::<span class="macro">path</span><span class="macro">!</span>(<span class="string">&quot;sum&quot;</span> <span class="op">/</span> <span class="ident">u32</span> <span class="op">/</span> <span class="ident">u32</span>)
+    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
+        <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{} + {} = {}&quot;</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span>)
+    });</pre></div>
+<p>The equivalent filter chain without using the <code>path!</code> macro looks this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">warp</span>::<span class="ident">Filter</span>;
+
+<span class="kw">let</span> <span class="ident">route</span> <span class="op">=</span> <span class="ident">warp</span>::<span class="ident">path</span>(<span class="string">&quot;sum&quot;</span>)
+    .<span class="ident">and</span>(<span class="ident">warp</span>::<span class="ident">path</span>::<span class="ident">param</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>())
+    .<span class="ident">and</span>(<span class="ident">warp</span>::<span class="ident">path</span>::<span class="ident">param</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>())
+    .<span class="ident">and</span>(<span class="ident">warp</span>::<span class="ident">path</span>::<span class="ident">end</span>())
+    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
+        <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{} + {} = {}&quot;</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span>)
+    });</pre></div>
+<h1 id="path-prefixes" class="section-header"><a href="#path-prefixes">Path Prefixes</a></h1>
+<p>The <code>path!</code> macro automatically assumes the path should include an <code>end()</code>
+filter. To build up a path filter <em>prefix</em>, such that the <code>end()</code> isn't
+included, use the <code>/ ..</code> syntax.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">warp</span>::<span class="ident">Filter</span>;
+
+<span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="ident">warp</span>::<span class="macro">path</span><span class="macro">!</span>(<span class="string">&quot;math&quot;</span> <span class="op">/</span> <span class="string">&quot;sum&quot;</span> <span class="op">/</span> ..);
+
+<span class="kw">let</span> <span class="ident">sum</span> <span class="op">=</span> <span class="ident">warp</span>::<span class="macro">path</span><span class="macro">!</span>(<span class="ident">u32</span> <span class="op">/</span> <span class="ident">u32</span>)
+    .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span>, <span class="ident">b</span><span class="op">|</span> {
+        <span class="macro">format</span><span class="macro">!</span>(<span class="string">&quot;{} + {} = {}&quot;</span>, <span class="ident">a</span>, <span class="ident">b</span>, <span class="ident">a</span> <span class="op">+</span> <span class="ident">b</span>)
+    });
+
+<span class="kw">let</span> <span class="ident">help</span> <span class="op">=</span> <span class="ident">warp</span>::<span class="ident">path</span>::<span class="ident">end</span>()
+    .<span class="ident">map</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;This API returns the sum of two u32&#39;s&quot;</span>);
+
+<span class="kw">let</span> <span class="ident">api</span> <span class="op">=</span> <span class="ident">prefix</span>.<span class="ident">and</span>(<span class="ident">sum</span>.<span class="ident">or</span>(<span class="ident">help</span>));</pre></div>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../";window.currentCrate = "warp";</script><script src="../aliases.js"></script><script src="../main.js"></script><script defer src="../search-index.js"></script></body></html>

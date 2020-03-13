@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="API documentation for the Rust `keep_alive` fn in crate `warp`."><meta name="keywords" content="rust, rustlang, rust-lang, keep_alive"><title>warp::filters::sse::keep_alive - Rust</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css"><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script src="../../../storage.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="../../../favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc fn"><!--[if lte IE 8]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu">&#9776;</div><a href='../../../warp/index.html'><div class='logo-container'><img src='../../../rust-logo.png' alt='logo'></div></a><div class="sidebar-elems"><p class='location'><a href='../../index.html'>warp</a>::<wbr><a href='../index.html'>filters</a>::<wbr><a href='index.html'>sse</a></p><script>window.sidebarCurrent = {name: 'keep_alive', ty: 'fn', relpath: ''};</script><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!"><img src="../../../brush.svg" width="18" alt="Pick another theme!"></button><div id="theme-choices"></div></div><script src="../../../theme.js"></script><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><a id="settings-menu" href="../../../settings.html"><img src="../../../wheel.svg" width="18" alt="Change settings"></a></div></form></nav><section id="main" class="content"><h1 class='fqn'><span class='out-of-band'><span id='render-detail'><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class='inner'>&#x2212;</span>]</a></span><a class='srclink' href='../../../src/warp/filters/sse.rs.html#559-564' title='goto source code'>[src]</a></span><span class='in-band'>Function <a href='../../index.html'>warp</a>::<wbr><a href='../index.html'>filters</a>::<wbr><a href='index.html'>sse</a>::<wbr><a class="fn" href=''>keep_alive</a></span></h1><pre class='rust fn'>pub fn keep_alive() -&gt; <a class="struct" href="../../../warp/filters/sse/struct.KeepAlive.html" title="struct warp::filters::sse::KeepAlive">KeepAlive</a></pre><div class='docblock'><p>Keeps event source connection alive when no events sent over a some time.</p>
+<p>Some proxy servers may drop HTTP connection after a some timeout of inactivity.
+This function helps to prevent such behavior by sending comment events every
+<code>keep_interval</code> of inactivity.</p>
+<p>By default the comment is <code>:</code> (an empty comment) and the time interval between
+events is 15 seconds. Both may be customized using the builder pattern
+as shown below.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered">
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">time</span>::<span class="ident">Duration</span>;
+<span class="kw">use</span> <span class="ident">std</span>::<span class="ident">convert</span>::<span class="ident">Infallible</span>;
+<span class="kw">use</span> <span class="ident">futures</span>::<span class="ident">StreamExt</span>;
+<span class="kw">use</span> <span class="ident">tokio</span>::<span class="ident">time</span>::<span class="ident">interval</span>;
+<span class="kw">use</span> <span class="ident">warp</span>::{<span class="ident">Filter</span>, <span class="ident">Stream</span>, <span class="ident">sse</span>::<span class="ident">ServerSentEvent</span>};
+
+<span class="comment">// create server-sent event</span>
+<span class="kw">fn</span> <span class="ident">sse_counter</span>(<span class="ident">counter</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span>  <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">ServerSentEvent</span>, <span class="ident">Infallible</span><span class="op">&gt;</span> {
+    <span class="prelude-val">Ok</span>(<span class="ident">warp</span>::<span class="ident">sse</span>::<span class="ident">data</span>(<span class="ident">counter</span>))
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">routes</span> <span class="op">=</span> <span class="ident">warp</span>::<span class="ident">path</span>(<span class="string">&quot;ticks&quot;</span>)
+        .<span class="ident">and</span>(<span class="ident">warp</span>::<span class="ident">get</span>())
+        .<span class="ident">map</span>(<span class="op">|</span><span class="op">|</span> {
+            <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="number">0</span>;
+            <span class="kw">let</span> <span class="ident">event_stream</span> <span class="op">=</span> <span class="ident">interval</span>(<span class="ident">Duration</span>::<span class="ident">from_secs</span>(<span class="number">15</span>)).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
+                <span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+                <span class="ident">sse_counter</span>(<span class="ident">counter</span>)
+            });
+            <span class="comment">// reply using server-sent events</span>
+            <span class="kw">let</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">warp</span>::<span class="ident">sse</span>::<span class="ident">keep_alive</span>()
+                .<span class="ident">interval</span>(<span class="ident">Duration</span>::<span class="ident">from_secs</span>(<span class="number">5</span>))
+                .<span class="ident">text</span>(<span class="string">&quot;thump&quot;</span>.<span class="ident">to_string</span>())
+                .<span class="ident">stream</span>(<span class="ident">event_stream</span>);
+            <span class="ident">warp</span>::<span class="ident">sse</span>::<span class="ident">reply</span>(<span class="ident">stream</span>)
+        });
+}</pre></div>
+<p>See <a href="https://www.w3.org/TR/2009/WD-eventsource-20090421/#notes">notes</a>.</p>
+</div></section><section id="search" class="content hidden"></section><section class="footer"></section><script>window.rootPath = "../../../";window.currentCrate = "warp";</script><script src="../../../aliases.js"></script><script src="../../../main.js"></script><script defer src="../../../search-index.js"></script></body></html>
