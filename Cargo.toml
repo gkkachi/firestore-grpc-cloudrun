@@ -1,6 +1,6 @@
 [package]
 name = "firestore_grpc_cloudrun"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Konosuke Kachi <github@s.k-kachi.net>"]
 edition = "2018"
 license = "MIT"
@@ -20,4 +20,3 @@ futures = "0.3"
 hyper = "0.13"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-warp = "0.2"
