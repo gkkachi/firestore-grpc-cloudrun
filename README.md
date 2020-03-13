@@ -15,6 +15,12 @@ firestore = { version = "0.1", package = "firestore_grpc_cloudrun" }
 
 ### `CreateDocument`
 
+#### Create a new app
+
+```bash
+cargo new firestore-rust && cd firestore-rust
+```
+
 #### `src/main.rs`
 
 ``` rust
@@ -51,8 +57,8 @@ async fn root(_req: Request<Body>) -> Result<Response<Body>, Infallible> {
 
 async fn create_document() -> Result<Document, BoxError> {
     let (mut client, project_id) = try_join!(
-        firestore::get_client(),
-        firestore::compute_metadata::get_project_id(),
+        get_client(),
+        get_project_id(),
     )?;
     let parent = format!("projects/{}/databases/(default)/documents", project_id);
     let collection_id = "greetings".into();
@@ -114,7 +120,7 @@ FROM debian:stretch-slim
 WORKDIR /app
 RUN apt-get update && apt-get install -y libgcc1 libgomp1 libstdc++6 ca-certificates &&  update-ca-certificates && rm -rf /var/lib/apt/lists/*
 
-COPY --from=build-env /app/target/release/cloudfunction-firestore /app/main
+COPY --from=build-env /app/target/release/firestore-rust /app/main
 ENTRYPOINT ["./main"]
 
 ```
