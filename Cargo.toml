@@ -10,6 +10,7 @@ description = """
 A gRPC client library for Firestore, intended to run on Cloud Run.
 """
 keywords = ["firebase", "firestore", "grpc", "gcp", "cloudrun"]
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
